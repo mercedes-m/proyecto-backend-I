@@ -3,7 +3,8 @@ const router = express.Router();
 const ProductManager = require('../managers/ProductManager');
 const productManager = new ProductManager();
 
-router.get('/home', async (req, res) => {
+// Vista principal - home
+router.get('/', async (req, res) => {
   const products = await productManager.getProducts();
   res.render('home', { title: 'Inicio', products });
 });
