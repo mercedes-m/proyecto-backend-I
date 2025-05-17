@@ -1,12 +1,1 @@
-[
-  {
-    "id": 1,
-    "title": "Producto de prueba",
-    "description": "Este es un producto de prueba",
-    "price": 150,
-    "code": "TEST001",
-    "stock": 10,
-    "category": "Pruebas",
-    "thumbnail": "https://via.placeholder.com/150"
-  }
-]
+[]
