@@ -1,0 +1,28 @@
+<h1>{{product.title}}</h1>
+
+<div class="product-detail">
+  <p><strong>Descripción:</strong> {{product.description}}</p>
+  <p><strong>Precio:</strong> ${{product.price}}</p>
+  <p><strong>Categoría:</strong> {{product.category}}</p>
+  <p><strong>Stock:</strong> {{product.stock}}</p>
+
+  <form action="/api/carts/ID_DEL_CARRITO/products/{{product._id}}" method="POST">
+    <button type="submit">Agregar al carrito</button>
+  </form>
+</div>
+
+<style>
+  .product-detail {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    max-width: 600px;
+    margin-top: 1rem;
+  }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+  }
+</style>
+  
