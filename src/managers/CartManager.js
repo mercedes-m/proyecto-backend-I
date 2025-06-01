@@ -1,46 +1,64 @@
-const fs = require('fs').promises;
-const path = require('path');
+const Cart = require('../models/Cart'); // importa el modelo Mongoose Cart
 
 class CartManager {
-    constructor() {
-        this.path = path.join(__dirname, '../data/carts.json');
+  async getCarts() {
+    return await Cart.find().populate('products.product').exec();
+  }
+
+  async createCart() {
+    const newCart = new Cart({ products: [] });
+    return await newCart.save();
+  }
+
+  async getCartById(id) {
+    return await Cart.findById(id).populate('products.product').exec();
+  }
+
+  async addProductToCart(cartId, productId) {
+    const cart = await Cart.findById(cartId);
+    if (!cart) return null;
+
+    // Buscar si el producto ya existe en el carrito
+    const existingProduct = cart.products.find(p => p.product.toString() === productId);
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      cart.products.push({ product: productId, quantity: 1 });
     }
 
-    async getCarts() {
-        const data = await fs.readFile(this.path, 'utf-8');
-        return JSON.parse(data);
-    }
+    await cart.save();
+    return cart;
+  }
 
-    async createCart() {
-        const carts = await this.getCarts();
-        const newCart = {
-            id: (carts.length ? carts[carts.length - 1].id + 1 : 1),
-            products: []
-        };
-        carts.push(newCart);
-        await fs.writeFile(this.path, JSON.stringify(carts, null, 2));
-        return newCart;
-    }
+  async updateProductQuantity(cartId, productId, quantity) {
+    const cart = await Cart.findById(cartId);
+    if (!cart) return null;
 
-    async getCartById(id) {
-        const carts = await this.getCarts();
-        return carts.find(c => c.id === id);
-    }
+    const productInCart = cart.products.find(p => p.product.toString() === productId);
+    if (!productInCart) return null;
 
-    async addProductToCart(cartId, productId) {
-        const carts = await this.getCarts();
-        const cart = carts.find(c => c.id === cartId);
-        if (!cart) return null;
+    productInCart.quantity = quantity;
+    await cart.save();
+    return cart;
+  }
 
-        const existingProduct = cart.products.find(p => p.product === productId);
-        if (existingProduct) {
-            existingProduct.quantity += 1;
-        } else {
-            cart.products.push({ product: productId, quantity: 1 });
-        }
-        await fs.writeFile(this.path, JSON.stringify(carts, null, 2));
-        return cart;
-    }
+  async removeProductFromCart(cartId, productId) {
+    const cart = await Cart.findById(cartId);
+    if (!cart) return null;
+
+    cart.products = cart.products.filter(p => p.product.toString() !== productId);
+    await cart.save();
+    return cart;
+  }
+
+  async clearCart(cartId) {
+    const cart = await Cart.findById(cartId);
+    if (!cart) return null;
+
+    cart.products = [];
+    await cart.save();
+    return cart;
+  }
 }
 
 module.exports = CartManager;
