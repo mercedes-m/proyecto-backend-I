@@ -17,13 +17,17 @@
 
 <div class="pagination">
   {{#if hasPrevPage}}
-    <a href="?page={{prevPage}}">« Anterior</a>
+    <a href="{{prevLink}}">« Anterior</a>
+  {{else}}
+    <span>« Anterior</span>
   {{/if}}
 
   <span>Página {{page}} de {{totalPages}}</span>
 
   {{#if hasNextPage}}
-    <a href="?page={{nextPage}}">Siguiente »</a>
+    <a href="{{nextLink}}">Siguiente »</a>
+  {{else}}
+    <span>Siguiente »</span>
   {{/if}}
 </div>
 
