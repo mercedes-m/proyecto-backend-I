@@ -1,4 +1,5 @@
-const Cart = require('../models/Cart'); // importa el modelo Mongoose Cart
+const Cart = require('../models/Cart');
+const Product = require('../models/Product');
 
 class CartManager {
   async getCarts() {
@@ -18,7 +19,9 @@ class CartManager {
     const cart = await Cart.findById(cartId);
     if (!cart) return null;
 
-    // Buscar si el producto ya existe en el carrito
+    const productExists = await Product.findById(productId);
+    if (!productExists) return null;
+
     const existingProduct = cart.products.find(p => p.product.toString() === productId);
     if (existingProduct) {
       existingProduct.quantity += 1;
@@ -36,6 +39,8 @@ class CartManager {
 
     const productInCart = cart.products.find(p => p.product.toString() === productId);
     if (!productInCart) return null;
+
+    if (quantity <= 0) return null; // o eliminarlo directamente
 
     productInCart.quantity = quantity;
     await cart.save();
@@ -56,6 +61,21 @@ class CartManager {
     if (!cart) return null;
 
     cart.products = [];
+    await cart.save();
+    return cart;
+  }
+
+  async replaceCartProducts(cartId, newProducts) {
+    const cart = await Cart.findById(cartId);
+    if (!cart) return null;
+
+    // Validar cada producto
+    for (const item of newProducts) {
+      const exists = await Product.findById(item.product);
+      if (!exists) return null; // o lanzar error
+    }
+
+    cart.products = newProducts;
     await cart.save();
     return cart;
   }
