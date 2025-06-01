@@ -9,12 +9,16 @@ const productRouter = require('./routes/products.router');
 const cartRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
 
+// Importar el nuevo ProductManager con Mongo
+const ProductManager = require('./managers/ProductManager'); // este es el que usa Mongoose
+const productManager = new ProductManager();
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 // Conectar a MongoDB antes de levantar el servidor
-connectDB(); 
+connectDB();
 
 // Configurar Handlebars
 app.engine('handlebars', engine());
@@ -47,7 +51,7 @@ io.on('connection', async socket => {
   });
 
   socket.on('delete-product', async id => {
-    await productManager.deleteProduct(parseInt(id));
+    await productManager.deleteProduct(id); // usar string o ObjectId si usás Mongo
     const updatedProducts = await productManager.getProducts();
     io.emit('products', updatedProducts);
   });
