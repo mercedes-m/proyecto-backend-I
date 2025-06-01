@@ -43,4 +43,24 @@ router.get('/products', async (req, res) => {
   }
 });
 
+// Vista de detalle de producto
+router.get('/products/:pid', async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const product = await productManager.getProductById(pid);
+
+    if (!product) {
+      return res.status(404).send('Producto no encontrado');
+    }
+
+    res.render('products/productDetail', {
+      title: product.title,
+      product,
+    });
+  } catch (error) {
+    console.error('Error al cargar el detalle del producto:', error.message);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
 module.exports = router;
