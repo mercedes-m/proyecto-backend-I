@@ -3,16 +3,21 @@ const { engine } = require('express-handlebars');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
+const connectDB = require('./utils/mongo'); // <--- ✅ CONEXIÓN A MONGO
 
 const productRouter = require('./routes/products.router');
 const cartRouter = require('./routes/carts.router');
-const viewsRouter = require('./routes/views.router'); // Nuevo: router para las vistas
+const viewsRouter = require('./routes/views.router');
+
 const ProductManager = require('./managers/ProductManager');
 const productManager = new ProductManager();
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
+// Conectar a MongoDB antes de levantar el servidor
+connectDB(); // <--- ✅ LLAMAMOS A LA FUNCIÓN DE CONEXIÓN
 
 // Configurar Handlebars
 app.engine('handlebars', engine());
@@ -31,27 +36,27 @@ app.use('/api/carts', cartRouter);
 // Rutas de vistas
 app.use('/', viewsRouter);
 
-// WebSocket - Productos en tiempo real
+// WebSocket
 io.on('connection', async socket => {
-    console.log('Nuevo cliente conectado con WebSocket');
-  
-    const products = await productManager.getProducts();
-    socket.emit('products', products);
-  
-    socket.on('new-product', async data => {
-      await productManager.addProduct(data);
-      const updatedProducts = await productManager.getProducts();
-      io.emit('products', updatedProducts);
-    });
+  console.log('Nuevo cliente conectado con WebSocket');
 
-    socket.on('delete-product', async id => {
-        await productManager.deleteProduct(parseInt(id));
-        const updatedProducts = await productManager.getProducts();
-        io.emit('products', updatedProducts);
-      });
-    });
+  const products = await productManager.getProducts();
+  socket.emit('products', products);
 
-    // Servidor escuchando
+  socket.on('new-product', async data => {
+    await productManager.addProduct(data);
+    const updatedProducts = await productManager.getProducts();
+    io.emit('products', updatedProducts);
+  });
+
+  socket.on('delete-product', async id => {
+    await productManager.deleteProduct(parseInt(id));
+    const updatedProducts = await productManager.getProducts();
+    io.emit('products', updatedProducts);
+  });
+});
+
+// Servidor escuchando
 const PORT = 8080;
 server.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
