@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ProductManager = require('../managers/ProductManager');
+const CartManager = require('../managers/CartManager');
+
 const productManager = new ProductManager();
+const cartManager = new CartManager(); // Asegurate de tenerlo implementado
 
 // Vista principal - home
 router.get('/', async (req, res) => {
@@ -59,6 +62,31 @@ router.get('/products/:pid', async (req, res) => {
     });
   } catch (error) {
     console.error('Error al cargar el detalle del producto:', error.message);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// ✅ Vista del carrito de compras
+router.get('/carts/:cid', async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const cart = await cartManager.getCartById(cid);
+
+    if (!cart) {
+      return res.status(404).send('Carrito no encontrado');
+    }
+
+    const total = cart.products.reduce((acc, item) => {
+      return acc + item.quantity * item.product.price;
+    }, 0);
+
+    res.render('carts/cartDetail', {
+      title: 'Detalle del carrito',
+      cart,
+      total,
+    });
+  } catch (error) {
+    console.error('Error al cargar el carrito:', error.message);
     res.status(500).send('Error interno del servidor');
   }
 });
