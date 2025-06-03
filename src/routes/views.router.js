@@ -66,7 +66,7 @@ router.get('/products/:pid', async (req, res) => {
   }
 });
 
-// ✅ Vista del carrito de compras
+// Vista del carrito de compras
 router.get('/carts/:cid', async (req, res) => {
   try {
     const { cid } = req.params;
