@@ -10,9 +10,11 @@ const productRouter = require('./routes/products.router');
 const cartRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
 
-// Importar el nuevo ProductManager con Mongo
+// Importar los managers necesarios
 const ProductManager = require('./managers/ProductManager'); 
 const productManager = new ProductManager();
+
+const sessionCart = require('./middlewares/sessionCart'); // Middleware personalizado para carrito en sesión
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +22,17 @@ const io = new Server(server);
 
 // Conectar a MongoDB antes de levantar el servidor
 connectDB();
+
+// Configurar express-session
+app.use(session({
+  secret: 'mi_clave_secreta_123',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 1000 * 60 * 60 } 
+}));
+
+// Middleware para crear o validar carrito en sesión
+app.use(sessionCart);
 
 // Configurar Handlebars con helpers
 app.engine('handlebars', engine({
@@ -34,14 +47,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Configurar express-session
-app.use(session({
-  secret: 'mi_clave_secreta_123',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 1000 * 60 * 60 } 
-}));
 
 // Rutas API
 app.use('/api/products', productRouter);
