@@ -4,6 +4,7 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./utils/mongo'); 
+const session = require('express-session');
 
 const productRouter = require('./routes/products.router');
 const cartRouter = require('./routes/carts.router');
@@ -33,6 +34,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Configurar express-session
+app.use(session({
+  secret: 'mi_clave_secreta_123',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 1000 * 60 * 60 } 
+}));
 
 // Rutas API
 app.use('/api/products', productRouter);
