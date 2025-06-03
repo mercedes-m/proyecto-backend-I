@@ -1,6 +1,13 @@
 <h1>Carrito</h1>
 
 {{#if cart.products.length}}
+  <form action="/api/carts/{{cart._id}}" method="POST" style="margin-bottom: 1rem;">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" onclick="return confirm('¿Estás seguro de vaciar el carrito?')">
+      Vaciar carrito
+    </button>
+  </form>
+
   <table>
     <thead>
       <tr>
@@ -8,6 +15,7 @@
         <th>Precio</th>
         <th>Cantidad</th>
         <th>Total</th>
+        <th>Acción</th>
       </tr>
     </thead>
     <tbody>
@@ -17,6 +25,12 @@
           <td>${{this.product.price}}</td>
           <td>{{this.quantity}}</td>
           <td>${{multiply this.quantity this.product.price}}</td>
+          <td>
+            <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}" method="POST">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" onclick="return confirm('¿Eliminar este producto del carrito?')">Eliminar</button>
+            </form>
+          </td>
         </tr>
       {{/each}}
     </tbody>
@@ -37,5 +51,9 @@
     border: 1px solid #ccc;
     padding: 0.5rem;
     text-align: center;
+  }
+  button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.9rem;
   }
 </style>
