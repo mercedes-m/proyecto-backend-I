@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./utils/mongo'); 
 const session = require('express-session');
+const methodOverride = require('method-override');
 
 const productRouter = require('./routes/products.router');
 const cartRouter = require('./routes/carts.router');
@@ -14,7 +15,7 @@ const viewsRouter = require('./routes/views.router');
 const ProductManager = require('./managers/ProductManager'); 
 const productManager = new ProductManager();
 
-const sessionCart = require('./middlewares/sessionCart'); // Middleware personalizado para carrito en sesión
+const sessionCart = require('./middlewares/sessionCart');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +34,9 @@ app.use(session({
 
 // Middleware para crear o validar carrito en sesión
 app.use(sessionCart);
+
+// Middleware para permitir PUT y DELETE en formularios
+app.use(methodOverride('_method'));
 
 // Configurar Handlebars con helpers
 app.engine('handlebars', engine({
