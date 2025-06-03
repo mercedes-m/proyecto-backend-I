@@ -6,7 +6,7 @@
   <p><strong>Categoría:</strong> {{product.category}}</p>
   <p><strong>Stock:</strong> {{product.stock}}</p>
 
-  <form action="/api/carts/ID_DEL_CARRITO/products/{{product._id}}" method="POST">
+  <form action="/api/carts/{{cartId}}/products/{{product._id}}" method="POST">
     <button type="submit">Agregar al carrito</button>
   </form>
 </div>
@@ -25,4 +25,3 @@
     padding: 0.5rem 1rem;
   }
 </style>
-  
