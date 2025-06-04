@@ -10,6 +10,7 @@ const methodOverride = require('method-override');
 const productRouter = require('./routes/products.router');
 const cartRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
+const mockRouter = require('./routes/mock.router');
 
 // Importar los managers necesarios
 const ProductManager = require('./managers/ProductManager'); 
@@ -58,6 +59,7 @@ app.use('/api/carts', cartRouter);
 
 // Rutas de vistas
 app.use('/', viewsRouter);
+app.use('/', mockRouter);
 
 // WebSocket
 io.on('connection', async socket => {
