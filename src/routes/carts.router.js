@@ -96,9 +96,15 @@ router.put('/:cid/products/:pid', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'ID inválido' });
     }
 
-    if (!quantity || typeof quantity !== 'number' || quantity < 1) {
-      return res.status(400).json({ status: 'error', message: 'Cantidad inválida' });
-    }
+   // Validar que quantity sea un entero positivo y definido
+    if (
+      quantity === undefined ||
+      typeof quantity !== 'number' ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({ status: 'error', message: 'Cantidad inválida (debe ser entero positivo)' });
+    } 
 
     const updatedCart = await cartManager.updateProductQuantity(cid, pid, quantity);
     if (!updatedCart) return res.status(404).json({ status: 'error', message: 'Carrito o producto no encontrado' });
