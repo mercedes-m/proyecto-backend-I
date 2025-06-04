@@ -4,31 +4,32 @@ const ProductManager = require('../managers/ProductManager');
 
 const productManager = new ProductManager();
 
-// Ruta temporal para insertar productos de prueba
 router.get('/mockproducts', async (req, res) => {
   try {
-    await productManager.addProduct({
-      title: 'Producto 1',
-      description: 'Descripción del producto 1',
-      price: 100,
-      stock: 20,
-      code: 'P001',
-      category: 'general'
-    });
+    const mockProducts = [];
 
-    await productManager.addProduct({
-      title: 'Producto 2',
-      description: 'Descripción del producto 2',
-      price: 150,
-      stock: 15,
-      code: 'P002',
-      category: 'general'
-    });
+    for (let i = 1; i <= 10; i++) {
+      mockProducts.push({
+        title: `Producto ${i}`,
+        description: `Descripción del producto ${i}`,
+        price: (10 + i) * 100,
+        code: `code${i}`,
+        stock: 50 + i,
+        category: i % 2 === 0 ? 'Electrónica' : 'Ropa',
+        thumbnails: [],
+        status: true
+      });
+    }
 
-    res.send('✅ Productos de prueba agregados');
+    // Guardarlos en la base de datos
+    for (const product of mockProducts) {
+      await productManager.addProduct(product);
+    }
+
+    res.send('✅ Productos mock cargados correctamente.');
   } catch (error) {
-    console.error('❌ Error agregando productos de prueba:', error.message);
-    res.status(500).send('Error al agregar productos');
+    console.error('❌ Error al cargar productos mock:', error.message);
+    res.status(500).send('Error al crear productos de prueba.');
   }
 });
 
