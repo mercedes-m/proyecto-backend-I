@@ -38,7 +38,9 @@ router.get('/products', async (req, res) => {
       prevLink: result.prevLink,
       nextLink: result.nextLink,
       page: result.page,
-      totalPages: result.totalPages
+      totalPages: result.totalPages,
+      sort,
+      query,
     });
   } catch (error) {
     console.error('Error al renderizar productos paginados:', error.message);
