@@ -6,6 +6,10 @@ class ProductManager {
     return await product.save();
   }
 
+  async getProducts() {
+    return await Product.find().lean();
+  }
+
   async getPaginatedProducts({ limit = 10, page = 1, sort, query }) {
     const filter = {};
 
