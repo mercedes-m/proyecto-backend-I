@@ -38,7 +38,7 @@ class CartManager {
 
   // Actualizar cantidad de un producto del carrito
   async updateProductQuantity(cartId, productId, quantity) {
-    if (quantity < 1) return null;
+    if (!Number.isInteger(quantity) || quantity < 1) return null;
 
     const cart = await Cart.findById(cartId);
     if (!cart) return null;
@@ -68,20 +68,31 @@ class CartManager {
     return await cart.save();
   }
 
+  // Reemplazar todos los productos del carrito
   async replaceCartProducts(cartId, newProducts) {
     const cart = await Cart.findById(cartId);
     if (!cart) return null;
 
-    for (const item of newProducts) {
-      const exists = await Product.findById(item.product);
-      if (!exists) return null; 
+    if (!Array.isArray(newProducts)) return null;
+
+    // Extraer IDs únicos de productos
+    const productIds = newProducts.map(p => p.product);
+    const uniqueProductIds = [...new Set(productIds)];
+
+    // Consultar una sola vez para validar existencia
+    const foundProducts = await Product.find({ _id: { $in: uniqueProductIds } });
+    if (foundProducts.length !== uniqueProductIds.length) {
+      // Algún producto no existe
+      return null;
     }
 
-    cart.products = newProducts.map(p => ({
+    // Validar cantidad y mapear productos sanitizados
+    const sanitizedProducts = newProducts.map(p => ({
       product: p.product,
-      quantity: p.quantity > 0 ? p.quantity : 1
+      quantity: (Number.isInteger(p.quantity) && p.quantity > 0) ? p.quantity : 1
     }));
 
+    cart.products = sanitizedProducts;
     return await cart.save();
   }
 }
