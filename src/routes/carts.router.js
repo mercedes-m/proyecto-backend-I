@@ -53,6 +53,13 @@ router.post('/:cid/products/:pid', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'ID inválido' });
     }
 
+    // Verificar existencia del producto
+    const Product = require('../models/product.model');
+    const product = await Product.findById(pid);
+    if (!product) {
+      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
+    }
+
     const updatedCart = await cartManager.addProductToCart(cid, pid);
     if (!updatedCart) return res.status(404).json({ status: 'error', message: 'Carrito o producto no encontrado' });
 
