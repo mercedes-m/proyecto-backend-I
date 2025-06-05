@@ -9,6 +9,7 @@ const cartManager = new CartManager(); // Asegurate de tenerlo implementado
 // Vista principal - home
 router.get('/', async (req, res) => {
   const products = await productManager.getProducts();
+  const cartId = req.session.cartId;
   res.render('home', { title: 'Inicio', products });
 });
 
