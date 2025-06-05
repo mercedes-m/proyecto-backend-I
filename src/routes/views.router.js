@@ -10,7 +10,7 @@ const cartManager = new CartManager(); // Asegurate de tenerlo implementado
 router.get('/', async (req, res) => {
   const products = await productManager.getProducts();
   const cartId = req.session.cartId;
-  res.render('home', { title: 'Inicio', products });
+  res.render('home', { title: 'Inicio', products , cartId });
 });
 
 // Vista con productos en tiempo real (WebSocket)
