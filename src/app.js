@@ -12,11 +12,14 @@ const cartRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
 const mockRouter = require('./routes/mock.router');
 
-// Importar los managers necesarios
+// Importar los managers
 const ProductManager = require('./managers/ProductManager'); 
 const productManager = new ProductManager();
 
 const sessionCart = require('./middlewares/sessionCart');
+
+// Importar helpers
+const helpers = require('./utils/helpers');
 
 const app = express();
 const server = http.createServer(app);
@@ -41,9 +44,7 @@ app.use(methodOverride('_method'));
 
 // Configurar Handlebars con helpers
 app.engine('handlebars', engine({
-  helpers: {
-    multiply: (a, b) => a * b
-  }
+  helpers: helpers
 }));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
