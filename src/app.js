@@ -12,14 +12,12 @@ const cartRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
 const mockRouter = require('./routes/mock.router');
 
-// Importar los managers
 const ProductManager = require('./managers/ProductManager'); 
-const productManager = new ProductManager();
-
-const sessionCart = require('./middlewares/sessionCart');
-
-// Importar helpers
+const CartManager = require('./managers/CartManager');
 const helpers = require('./utils/helpers');
+
+const productManager = new ProductManager();
+const cartManager = new CartManager();
 
 const app = express();
 const server = http.createServer(app);
@@ -33,11 +31,23 @@ app.use(session({
   secret: 'mi_clave_secreta_123',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 1000 * 60 * 60 } 
+  cookie: { maxAge: 1000 * 60 * 60 } // 1 hora
 }));
 
 // Middleware para crear o validar carrito en sesión
-app.use(sessionCart);
+app.use(async (req, res, next) => {
+  if (!req.session.cartId) {
+    try {
+      const newCart = await cartManager.createCart();
+      req.session.cartId = newCart._id.toString();
+      console.log('🛒 Carrito creado para la sesión:', req.session.cartId);
+    } catch (err) {
+      console.error('Error creando carrito para sesión:', err.message);
+      return res.status(500).send('Error al inicializar carrito');
+    }
+  }
+  next();
+});
 
 // Middleware para permitir PUT y DELETE en formularios
 app.use(methodOverride('_method'));
