@@ -79,15 +79,17 @@ router.get('/carts/:cid', async (req, res) => {
       return res.status(404).send('Carrito no encontrado');
     }
 
-    const products = Array.isArray(cart.products) ? cart.products : [];
+    if (!Array.isArray(cart.products)) {
+      return res.status(500).send('El carrito no tiene productos válidos');
+    }
 
     const total = cart.products.reduce((acc, item) => {
-      return acc + (item.quantity * (item.product?.price || 0));
+      return acc + item.quantity * item.product.price;
     }, 0);
 
     res.render('carts/cartDetail', {
       title: 'Detalle del carrito',
-      cart: { ...cart, products },
+      cart,
       total,
     });
   } catch (error) {
