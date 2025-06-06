@@ -23,7 +23,7 @@
       <p><strong>Categoría:</strong> {{this.category}}</p>
 
       <a href="/products/{{this._id}}">Ver detalles</a>
-      <form action="/api/carts/665e3d2f1f0a8e3fc82f2f3a/products/{{this._id}}" method="POST">
+      <form action="/api/carts/{{../cartId}}/products/{{this._id}}" method="POST">
         <button type="submit">Agregar al carrito</button>
       </form>
     </div>
