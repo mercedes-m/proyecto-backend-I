@@ -44,8 +44,10 @@ app.use(methodOverride('_method'));
 
 // Configurar Handlebars con helpers
 app.engine('handlebars', engine({
-  helpers: helpers
+  helpers: helpers,
+  allowProtoPropertiesByDefault: true,
 }));
+
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
