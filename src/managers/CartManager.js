@@ -15,7 +15,16 @@ class CartManager {
 
   // Obtener un carrito por ID con productos
   async getCartById(cartId) {
-    return await Cart.findById(cartId).populate('products.product').lean;
+  const cart = await Cart.findById(cartId).populate('products.product').lean();
+
+  if (!cart) return null;
+
+  if (!Array.isArray(cart.products)) {
+    cart.products = [];
+  }
+
+  return cart;
+
   }
 
   // Agregar producto (o aumentar cantidad) en el carrito
