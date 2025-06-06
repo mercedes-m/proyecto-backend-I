@@ -1,108 +1,116 @@
 const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
+const mongoose = require('mongoose');
 
 class CartManager {
-  // Obtener todos los carritos con productos
-  async getCarts() {
-    return await Cart.find().populate('products.product');
+  isValidId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
   }
 
-  // Crear carrito vacío
+  async getCarts() {
+    return await Cart.find().populate('products.product').lean();
+  }
+
+  async getCartById(cid) {
+    if (!this.isValidId(cid)) return null;
+    return await Cart.findById(cid).populate('products.product').lean();
+  }
+
   async createCart() {
     const newCart = new Cart({ products: [] });
     return await newCart.save();
   }
 
-  // Obtener un carrito por ID con productos
-  async getCartById(cartId) {
-  const cart = await Cart.findById(cartId).populate('products.product').lean();
+  async addProductToCart(cid, pid) {
+    if (!this.isValidId(cid) || !this.isValidId(pid)) return null;
 
-  if (!cart) return null;
-
-  if (!Array.isArray(cart.products)) {
-    cart.products = [];
-  }
-
-  return cart;
-
-  }
-
-  // Agregar producto (o aumentar cantidad) en el carrito
-  async addProductToCart(cartId, productId) {
-    const cart = await Cart.findById(cartId);
+    const cart = await Cart.findById(cid);
     if (!cart) return null;
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(pid);
     if (!product) return null;
 
-    const item = cart.products.find(p => p.product.toString() === productId);
+    const item = cart.products.find(p => p.product.toString() === pid);
     if (item) {
       item.quantity += 1;
     } else {
-      cart.products.push({ product: productId, quantity: 1 });
+      cart.products.push({ product: pid, quantity: 1 });
     }
 
-    return await cart.save();
+    await cart.save();
+    return await cart.populate('products.product');
   }
 
-  // Actualizar cantidad de un producto del carrito
-  async updateProductQuantity(cartId, productId, quantity) {
-    if (!Number.isInteger(quantity) || quantity < 1) return null;
+  async removeProductFromCart(cid, pid) {
+    if (!this.isValidId(cid) || !this.isValidId(pid)) return null;
 
-    const cart = await Cart.findById(cartId);
+    const cart = await Cart.findById(cid);
     if (!cart) return null;
 
-    const item = cart.products.find(p => p.product.toString() === productId);
-    if (!item) return null;
+    const index = cart.products.findIndex(p => p.product.toString() === pid);
+    if (index === -1) return null;
 
-    item.quantity = quantity;
-    return await cart.save();
+    if (cart.products[index].quantity > 1) {
+      cart.products[index].quantity -= 1;
+    } else {
+      cart.products.splice(index, 1);
+    }
+
+    await cart.save();
+    return await cart.populate('products.product');
   }
 
-  // Eliminar un producto del carrito
-  async removeProductFromCart(cartId, productId) {
-    const cart = await Cart.findById(cartId);
-    if (!cart) return null;
+  async clearCart(cid) {
+    if (!this.isValidId(cid)) return null;
 
-    cart.products = cart.products.filter(p => p.product.toString() !== productId);
-    return await cart.save();
-  }
-
-  // Vaciar el carrito
-  async clearCart(cartId) {
-    const cart = await Cart.findById(cartId);
+    const cart = await Cart.findById(cid);
     if (!cart) return null;
 
     cart.products = [];
-    return await cart.save();
+    await cart.save();
+    return await cart.populate('products.product');
   }
 
-  // Reemplazar todos los productos del carrito
-  async replaceCartProducts(cartId, newProducts) {
-    const cart = await Cart.findById(cartId);
+  async updateProductQuantity(cid, pid, quantity) {
+    if (!this.isValidId(cid) || !this.isValidId(pid)) return null;
+
+    const cart = await Cart.findById(cid);
     if (!cart) return null;
 
-    if (!Array.isArray(newProducts)) return null;
+    const item = cart.products.find(p => p.product.toString() === pid);
+    if (!item) return null;
 
-    // Extraer IDs únicos de productos
-    const productIds = newProducts.map(p => p.product);
-    const uniqueProductIds = [...new Set(productIds)];
+    item.quantity = quantity;
+    await cart.save();
+    return await cart.populate('products.product');
+  }
 
-    // Consultar una sola vez para validar existencia
-    const foundProducts = await Product.find({ _id: { $in: uniqueProductIds } });
-    if (foundProducts.length !== uniqueProductIds.length) {
-      // Algún producto no existe
-      return null;
+  async replaceCartProducts(cid, products) {
+    if (!this.isValidId(cid)) return null;
+
+    const cart = await Cart.findById(cid);
+    if (!cart) return null;
+
+    if (!Array.isArray(products)) return null;
+
+    // Validar cada producto
+    for (const item of products) {
+      if (
+        !item.product ||
+        !this.isValidId(item.product) ||
+        typeof item.quantity !== 'number' ||
+        item.quantity < 1
+      ) {
+        return null;
+      }
+
+      const exists = await Product.findById(item.product);
+      if (!exists) return null;
     }
 
-    // Validar cantidad y mapear productos
-    const sanitizedProducts = newProducts.map(p => ({
-      product: p.product,
-      quantity: (Number.isInteger(p.quantity) && p.quantity > 0) ? p.quantity : 1
-    }));
-
-    cart.products = sanitizedProducts;
-    return await cart.save();
+    cart.products = products;
+    await cart.save();
+    return await cart.populate('products.product');
   }
 }
 
