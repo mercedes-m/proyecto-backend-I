@@ -1,18 +1,26 @@
 <h1>Lista de Productos</h1>
 
-<div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-  {{#each products}}
-    <div style="border: 1px solid #ccc; padding: 1rem; width: 250px;">
-      <strong>{{title}}</strong><br />
-      <small>{{description}}</small><br />
-      <span><strong>Precio:</strong> ${{price}}</span><br />
-      <span><strong>Código:</strong> {{code}}</span><br />
-      <span><strong>Stock:</strong> {{stock}}</span><br />
-      <span><strong>Categoría:</strong> {{category}}</span><br />
+{{#if products.length}}
+  <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+    {{#each products}}
+      <div style="border: 1px solid #ccc; padding: 1rem; width: 250px; border-radius: 6px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
+        <strong>{{title}}</strong><br />
+        <small>{{description}}</small><br />
+        <span><strong>Precio:</strong> ${{price}}</span><br />
+        <span><strong>Código:</strong> {{code}}</span><br />
+        <span><strong>Stock:</strong> {{stock}}</span><br />
+        <span><strong>Categoría:</strong> {{category}}</span><br />
 
-      <form action="/api/carts/{{../cartId}}/products/{{this._id}}" method="POST" style="margin-top: 0.5rem;">
-        <button type="submit">Agregar al carrito</button>
-      </form>
-    </div>
-  {{/each}}
-</div>
+        {{#if ../cartId}}
+          <form action="/api/carts/{{../cartId}}/products/{{this._id}}" method="POST" style="margin-top: 0.5rem;">
+            <button type="submit">Agregar al carrito</button>
+          </form>
+        {{else}}
+          <p style="color: red;">Error: carrito no disponible.</p>
+        {{/if}}
+      </div>
+    {{/each}}
+  </div>
+{{else}}
+  <p>No hay productos disponibles por el momento.</p>
+{{/if}}
