@@ -32,7 +32,7 @@
             {{/if}}
           </td>
           <td>
-            <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}" method="POST" enctype="application/x-www-form-urlencoded">
+            <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}" method="POST">
               <input type="hidden" name="_method" value="DELETE">
               <button type="submit" onclick="return confirm('¿Eliminar este producto del carrito?')">Eliminar</button>
             </form>
