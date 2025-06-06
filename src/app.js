@@ -23,10 +23,18 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Conectar a MongoDB antes de levantar el servidor
+// Conectar a MongoDB
 connectDB();
 
-// Configurar express-session
+// Middlewares para JSON y formularios
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 🛠️ MOVER methodOverride AQUÍ, antes de rutas
+app.use(methodOverride('_method'));
+
+// Session
 app.use(session({
   secret: 'mi_clave_secreta_123',
   resave: false,
@@ -34,27 +42,20 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 } // 1 hora
 }));
 
-// Middleware para crear o validar carrito en sesión
+// Middleware para validar o crear carrito
 app.use(async (req, res, next) => {
   if (!req.session.cartId) {
     try {
       const newCart = await cartManager.createCart();
       req.session.cartId = newCart._id.toString();
-      console.log('🛒 Carrito creado para la sesión:', req.session.cartId);
+      console.log('🛒 Carrito creado para sesión:', req.session.cartId);
     } catch (err) {
-      console.error('Error creando carrito para sesión:', err.message);
+      console.error('Error creando carrito de sesión:', err.message);
       return res.status(500).send('Error al inicializar carrito');
     }
   }
   next();
 });
-
-// Middlewares de archivos estáticos y body parsing
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(methodOverride('_method'));
 
 // Configurar Handlebars con helpers
 app.engine('handlebars', engine({
@@ -64,17 +65,15 @@ app.engine('handlebars', engine({
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
-// Rutas API
+// Rutas
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
-
-// Rutas vistas
 app.use('/', viewsRouter);
 app.use('/', mockRouter);
 
 // WebSocket
 io.on('connection', async socket => {
-  console.log('Nuevo cliente conectado con WebSocket');
+  console.log('📡 Cliente conectado con WebSocket');
 
   const products = await productManager.getProducts();
   socket.emit('products', products);
@@ -92,7 +91,7 @@ io.on('connection', async socket => {
   });
 });
 
-// Servidor escuchando
+// Iniciar servidor
 const PORT = 8080;
 server.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
