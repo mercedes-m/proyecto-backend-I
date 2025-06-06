@@ -3,7 +3,7 @@ const { engine } = require('express-handlebars');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
-const connectDB = require('./utils/mongo'); 
+const connectDB = require('./utils/mongo');
 const session = require('express-session');
 const methodOverride = require('method-override');
 
@@ -12,7 +12,7 @@ const cartRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
 const mockRouter = require('./routes/mock.router');
 
-const ProductManager = require('./managers/ProductManager'); 
+const ProductManager = require('./managers/ProductManager');
 const CartManager = require('./managers/CartManager');
 const helpers = require('./utils/helpers');
 
@@ -49,28 +49,26 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Middleware para permitir PUT y DELETE en formularios
+// Middlewares de archivos estáticos y body parsing
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(methodOverride('_method'));
 
 // Configurar Handlebars con helpers
 app.engine('handlebars', engine({
   helpers: helpers,
-  allowProtoPropertiesByDefault: true,
+  allowProtoPropertiesByDefault: true
 }));
-
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
-
-// Middleware para archivos estáticos y JSON
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Rutas API
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
 
-// Rutas de vistas
+// Rutas vistas
 app.use('/', viewsRouter);
 app.use('/', mockRouter);
 
@@ -88,7 +86,7 @@ io.on('connection', async socket => {
   });
 
   socket.on('delete-product', async id => {
-    await productManager.deleteProduct(id); 
+    await productManager.deleteProduct(id);
     const updatedProducts = await productManager.getProducts();
     io.emit('products', updatedProducts);
   });
@@ -97,5 +95,5 @@ io.on('connection', async socket => {
 // Servidor escuchando
 const PORT = 8080;
 server.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
+  console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
