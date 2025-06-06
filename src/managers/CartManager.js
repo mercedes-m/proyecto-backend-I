@@ -15,7 +15,7 @@ class CartManager {
 
   // Obtener un carrito por ID con productos
   async getCartById(cartId) {
-    return await Cart.findById(cartId).populate('products.product');
+    return await Cart.findById(cartId).populate('products.product').lean;
   }
 
   // Agregar producto (o aumentar cantidad) en el carrito
@@ -86,7 +86,7 @@ class CartManager {
       return null;
     }
 
-    // Validar cantidad y mapear productos sanitizados
+    // Validar cantidad y mapear productos
     const sanitizedProducts = newProducts.map(p => ({
       product: p.product,
       quantity: (Number.isInteger(p.quantity) && p.quantity > 0) ? p.quantity : 1
