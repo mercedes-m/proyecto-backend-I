@@ -4,7 +4,7 @@ const ProductManager = require('../managers/ProductManager');
 const CartManager = require('../managers/CartManager');
 
 const productManager = new ProductManager();
-const cartManager = new CartManager(); // Asegurate de tenerlo implementado
+const cartManager = new CartManager(); 
 
 // Vista principal - home
 router.get('/', async (req, res) => {
@@ -79,13 +79,15 @@ router.get('/carts/:cid', async (req, res) => {
       return res.status(404).send('Carrito no encontrado');
     }
 
+    const products = Array.isArray(cart.products) ? cart.products : [];
+
     const total = cart.products.reduce((acc, item) => {
       return acc + item.quantity * item.product.price;
     }, 0);
 
     res.render('carts/cartDetail', {
       title: 'Detalle del carrito',
-      cart,
+      cart: { ...cart, products },
       total,
     });
   } catch (error) {
